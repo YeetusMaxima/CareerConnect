@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/dashboard.css">
+{% endblock %}
+
+{% block title %}My Dashboard - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Welcome back, {{ user.username }}!</h1>
+            <p style="color: var(--gray-color);">Manage your job applications and profile</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ applications.count }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ saved_jobs.count }}</div>
+                <div class="stat-label">Saved Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {{ applications|length }}
+                </div>
+                <div class="stat-label">This Month</div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <h2 class="mb-2">Quick Actions</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{% url 'jobs:job_listings' %}" class="btn btn-primary">Browse Jobs</a>
+                <a href="{% url 'jobs:seeker_profile' %}" class="btn btn-outline">Update Profile</a>
+            </div>
+        </div>
+        
+        <!-- My Applications -->
+        <div class="card mb-4">
+            <h2 class="mb-3">My Applications</h2>
+            {% if applications %}
+                <div class="table">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for application in applications %}
+                                <tr>
+                                    <td>{{ application.job.title }}</td>
+                                    <td>{{ application.job.company_name }}</td>
+                                    <td>{{ application.applied_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if application.status == 'pending' %}
+                                            <span class="tag tag-warning">Pending</span>
+                                        {% elif application.status == 'reviewed' %}
+                                            <span class="tag tag-primary">Reviewed</span>
+                                        {% elif application.status == 'shortlisted' %}
+                                            <span class="tag tag-success">Shortlisted</span>
+                                        {% elif application.status == 'rejected' %}
+                                            <span class="tag tag-danger">Rejected</span>
+                                        {% elif application.status == 'accepted' %}
+                                            <span class="tag tag-success">Accepted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'jobs:job_detail' application.job.id %}" class="btn btn-small btn-outline">View Job</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="text-align: center; color: var(--gray-color); padding: 2rem;">
+                    You haven't applied to any jobs yet. <a href="{% url 'jobs:job_listings' %}" style="color: var(--primary-color);">Start browsing</a>
+                </p>
+            {% endif %}
+        </div>
+        
+        <!-- Saved Jobs -->
+        <div class="card">
+            <h2 class="mb-3">Saved Jobs</h2>
+            {% if saved_jobs %}
+                <div class="grid">
+                    {% for saved in saved_jobs %}
+                        <div class="job-card">
+                            <div class="job-info">
+                                <h3 class="job-title">
+                                    <a href="{% url 'jobs:job_detail' saved.job.id %}" style="text-decoration: none; color: inherit;">
+                                        {{ saved.job.title }}
+                                    </a>
+                                </h3>
+                                <p class="job-company">{{ saved.job.company_name }}</p>
+                                <div class="job-meta">
+                                    <span class="job-meta-item">📍 {{ saved.job.location }}</span>
+                                    <span class="job-meta-item">💰 {{ saved.job.salary_range }}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{% url 'jobs:job_detail' saved.job.id %}" class="btn btn-primary btn-small">View</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center; color: var(--gray-color); padding: 2rem;">
+                    No saved jobs yet.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% block extra_js %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Listings - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <h1 class="mb-3">Browse Job Opportunities</h1>
+        
+        <!-- Filters -->
+        <div class="filters">
+            <form method="get" action="{% url 'jobs:job_listings' %}">
+                <div class="filter-row">
+                    {{ form.keyword }}
+                    {{ form.location }}
+                    {{ form.category }}
+                    {{ form.job_type }}
+                    {{ form.min_salary }}
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'jobs:job_listings' %}" class="btn btn-outline">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Results Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <p style="color: var(--gray-color);">{{ total_jobs }} job(s) found</p>
+            <div>
+                <label for="sort" style="margin-right: 0.5rem;">Sort by:</label>
+                <select id="sort" onchange="window.location.href='?sort='+this.value">
+                    <option value="-posted_date">Latest</option>
+                    <option value="-salary_max">Highest Salary</option>
+                    <option value="salary_max">Lowest Salary</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Job Listings -->
+        <div class="grid">
+            {% for job in page_obj %}
+                <div class="job-card">
+                    {% if job.company_logo %}
+                        <img src="{{ job.company_logo.url }}" alt="{{ job.company_name }}" class="job-logo">
+                    {% else %}
+                        <div class="job-logo" style="display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--light-gray);">
+                            🏢
+                        </div>
+                    {% endif %}
+                    
+                    <div class="job-info">
+                        <h3 class="job-title">
+                            <a href="{% url 'jobs:job_detail' job.id %}" style="text-decoration: none; color: inherit;">
+                                {{ job.title }}
+                            </a>
+                        </h3>
+                        <p class="job-company">{{ job.company_name }}</p>
+                        
+                        <div class="job-meta">
+                            <span class="job-meta-item">📍 {{ job.location }}</span>
+                            <span class="job-meta-item">💰 {{ job.salary_range }}</span>
+                            <span class="job-meta-item">⏰ {{ job.get_job_type_display }}</span>
+                            <span class="job-meta-item">📅 {{ job.posted_date|date:"M d, Y" }}</span>
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <span class="tag tag-primary">{{ job.get_category_display }}</span>
+                            {% if job.experience_required %}
+                                <span class="tag tag-success">{{ job.experience_required }}+ years</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-primary btn-small">View Details</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="card text-center" style="padding: 3rem;">
+                    <h3>No jobs found</h3>
+                    <p>Try adjusting your filters or search criteria</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">« First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last »</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% block extra_js %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}
+
+<style>
+    select {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}

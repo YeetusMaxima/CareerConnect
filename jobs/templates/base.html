@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareerConnect - Find Your Dream Job{% endblock %}</title>
+    
+    <!-- Main Stylesheet - MUST BE LOADED FIRST -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- Extra CSS block for page-specific styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="container">
+        <nav class="navbar">
+            <a href="{% url 'jobs:home' %}" class="logo">CareerConnect</a>
+            <ul class="nav-menu">
+                <li><a href="{% url 'jobs:home' %}">Home</a></li>
+                <li><a href="{% url 'jobs:job_listings' %}">Find Jobs</a></li>
+                <li><a href="{% url 'jobs:about' %}">About</a></li>
+                <li><a href="{% url 'jobs:contact' %}">Contact</a></li>
+
+                {% if user.is_authenticated %}
+                    {% if user.profile.user_type == 'seeker' %}
+                        <li><a href="{% url 'jobs:seeker_dashboard' %}">Dashboard</a></li>
+                    {% elif user.profile.user_type == 'employer' %}
+                        <li><a href="{% url 'jobs:employer_dashboard' %}">Dashboard</a></li>
+                        <li>
+                            <a href="{% url 'jobs:post_job' %}"
+                               class="btn btn-primary btn-small">Post Job</a>
+                        </li>
+                    {% endif %}
+                    <li><a href="{% url 'jobs:logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'jobs:login' %}">Login</a></li>
+                    <li>
+                        <a href="{% url 'jobs:register' %}"
+                           class="btn btn-primary btn-small">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- Messages -->
+{% if messages %}
+<div class="container" style="margin-top: 1rem;">
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="message message-{{ message.tags }}">
+                {{ message }}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+
+            <div class="footer-section">
+                <h3>CareerConnect</h3>
+                <p>Your gateway to finding the perfect job or the perfect candidate.</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>For Job Seekers</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'jobs:job_listings' %}">Browse Jobs</a></li>
+                    <li><a href="{% url 'jobs:register' %}">Create Account</a></li>
+                    {% if user.is_authenticated and user.profile.user_type == 'seeker' %}
+                        <li><a href="{% url 'jobs:seeker_dashboard' %}">My Dashboard</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>For Employers</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'jobs:post_job' %}">Post a Job</a></li>
+                    <li><a href="{% url 'jobs:register' %}">Create Account</a></li>
+                    {% if user.is_authenticated and user.profile.user_type == 'employer' %}
+                        <li><a href="{% url 'jobs:employer_dashboard' %}">My Dashboard</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'jobs:about' %}">About Us</a></li>
+                    <li><a href="{% url 'jobs:contact' %}">Contact</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 CareerConnect. A 6th Semester Project. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

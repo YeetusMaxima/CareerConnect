@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/dashboard.css">
+{% endblock %}
+
+{% block title %}Employer Dashboard - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Employer Dashboard</h1>
+            <p style="color: var(--gray-color);">Manage your job postings and applications</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ jobs.count }}</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_applications }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ jobs|length }}</div>
+                <div class="stat-label">Total Posted</div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <h2 class="mb-2">Quick Actions</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{% url 'jobs:post_job' %}" class="btn btn-primary">Post New Job</a>
+                <a href="{% url 'jobs:employer_profile' %}" class="btn btn-outline">Update Profile</a>
+            </div>
+        </div>
+        
+        <!-- My Job Postings -->
+        <div class="card">
+            <h2 class="mb-3">My Job Postings</h2>
+            {% if jobs %}
+                <div class="table">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Location</th>
+                                <th>Applications</th>
+                                <th>Posted Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td>{{ job.title }}</td>
+                                    <td>{{ job.location }}</td>
+                                    <td>{{ job.applications.count }}</td>
+                                    <td>{{ job.posted_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if job.is_active %}
+                                            <span class="tag tag-success">Active</span>
+                                        {% else %}
+                                            <span class="tag tag-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <a href="{% url 'jobs:view_applications' job.id %}" class="btn btn-small btn-primary">
+                                                View ({{ job.applications.count }})
+                                            </a>
+                                            <a href="{% url 'jobs:edit_job' job.id %}" class="btn btn-small btn-outline">Edit</a>
+                                            <a href="{% url 'jobs:delete_job' job.id %}" class="btn btn-small btn-danger">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="text-align: center; color: var(--gray-color); padding: 2rem;">
+                    You haven't posted any jobs yet. <a href="{% url 'jobs:post_job' %}" style="color: var(--primary-color);">Post your first job</a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% block extra_js %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}
+{% endblock %}

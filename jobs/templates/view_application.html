@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/applications.css">
+{% endblock %}
+
+{% block title %}Applications for {{ job.title }} - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="card mb-3">
+            <h2 class="mb-1">Applications for {{ job.title }}</h2>
+            <p style="color: var(--gray-color);">{{ applications.count }} application(s) received</p>
+        </div>
+        
+        {% if applications %}
+            <div class="grid">
+                {% for application in applications %}
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 class="card-title">{{ application.applicant.username }}</h3>
+                                <p class="card-subtitle">Applied: {{ application.applied_date|date:"M d, Y" }}</p>
+                            </div>
+                            <div>
+                                {% if application.status == 'pending' %}
+                                    <span class="tag tag-warning">Pending</span>
+                                {% elif application.status == 'reviewed' %}
+                                    <span class="tag tag-primary">Reviewed</span>
+                                {% elif application.status == 'shortlisted' %}
+                                    <span class="tag tag-success">Shortlisted</span>
+                                {% elif application.status == 'rejected' %}
+                                    <span class="tag tag-danger">Rejected</span>
+                                {% elif application.status == 'accepted' %}
+                                    <span class="tag tag-success">Accepted</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <p><strong>Email:</strong> {{ application.contact_email }}</p>
+                            <p><strong>Phone:</strong> {{ application.contact_phone }}</p>
+                            <p><strong>Cover Letter:</strong></p>
+                            <p style="white-space: pre-line; background: var(--light-gray); padding: 1rem; border-radius: 6px; font-size: 0.9rem;">{{ application.cover_letter }}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            {% if application.resume %}
+                                <a href="{{ application.resume.url }}" class="btn btn-outline btn-small" download>
+                                    📄 Download Resume
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                        <form method="post" action="{% url 'update_application_status' application.id %}">
+                            {% csrf_token %}
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label for="status_{{ application.id }}" style="font-weight: 500;">Update Status:</label>
+                                <select name="status" id="status_{{ application.id }}" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                                    {% for value, label in application.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if value == application.status %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-small">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center" style="padding: 3rem;">
+                <h3>No applications yet</h3>
+                <p style="color: var(--gray-color);">Applications will appear here when job seekers apply for this position.</p>
+            </div>
+        {% endif %}
+        
+        <div class="mt-3 text-center">
+            <a href="{% url 'employer_dashboard' %}" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+{% block extra_js %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}
+{% endblock %}

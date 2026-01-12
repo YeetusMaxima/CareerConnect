@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/confirmation.css">
+{% endblock %}
+
+{% block title %}Delete Job - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="card text-center" style="max-width: 600px; margin: 0 auto; padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; color: var(--danger-color);">⚠️</div>
+            <h2 style="margin-bottom: 1rem;">Delete Job Posting?</h2>
+            <p style="color: var(--gray-color); margin-bottom: 2rem;">
+                Are you sure you want to delete "{{ job.title }}"? This action cannot be undone.
+                All applications for this job will also be deleted.
+            </p>
+            
+            <form method="post" style="display: flex; gap: 1rem; justify-content: center;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'jobs:employer_dashboard' %}" class="btn btn-outline">Cancel</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

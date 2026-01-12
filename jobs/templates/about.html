@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/about_contact.css">
+{% endblock %}
+
+{% block title %}About Us - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="card text-center" style="margin-bottom: 3rem; padding: 3rem;">
+            <h1 style="margin-bottom: 1rem;">About CareerConnect</h1>
+            <p style="font-size: 1.125rem; color: var(--gray-color); max-width: 800px; margin: 0 auto;">
+                Connecting talented individuals with their dream careers and helping companies find the perfect candidates.
+            </p>
+        </div>
+        
+        <div class="grid grid-2" style="margin-bottom: 3rem;">
+            <div class="card">
+                <h2 style="margin-bottom: 1rem;">Our Mission</h2>
+                <p style="line-height: 1.8;">
+                    CareerConnect is dedicated to bridging the gap between job seekers and employers. 
+                    We believe that finding the right job or the right candidate should be simple, 
+                    efficient, and accessible to everyone. Our platform is designed to make the job 
+                    search and recruitment process as smooth as possible.
+                </p>
+            </div>
+            
+            <div class="card">
+                <h2 style="margin-bottom: 1rem;">Our Vision</h2>
+                <p style="line-height: 1.8;">
+                    We envision a world where every talented individual finds meaningful work that 
+                    aligns with their skills and aspirations, and every company has access to a 
+                    diverse pool of qualified candidates. Through technology and innovation, we're 
+                    making this vision a reality.
+                </p>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-bottom: 3rem; padding: 3rem;">
+            <h2 class="text-center" style="margin-bottom: 2rem;">Why Choose Us?</h2>
+            <div class="grid grid-3">
+                <div class="text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <h3 style="margin-bottom: 0.5rem;">Easy to Use</h3>
+                    <p>Simple, intuitive interface designed for both job seekers and employers</p>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                    <h3 style="margin-bottom: 0.5rem;">Fast & Efficient</h3>
+                    <p>Quick application process and efficient candidate management tools</p>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💼</div>
+                    <h3 style="margin-bottom: 0.5rem;">Quality Matches</h3>
+                    <p>Advanced filtering and search to find the perfect fit</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 1rem;">About This Project</h2>
+            <p style="line-height: 1.8; margin-bottom: 1rem;">
+                CareerConnect is a comprehensive job portal web application developed as a 6th semester 
+                academic project. The platform demonstrates modern web development practices using Django, 
+                HTML, CSS, and JavaScript.
+            </p>
+            <p style="line-height: 1.8;">
+                <strong>Features:</strong> User authentication, role-based dashboards (Job Seeker & Employer), 
+                job posting and application management, advanced search and filtering, profile management, 
+                and responsive design.
+            </p>
+        </div>
+        
+        <div class="card mt-4" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; text-align: center; padding: 3rem;">
+            <h2 style="color: white; margin-bottom: 1rem;">Ready to Get Started?</h2>
+            <p style="font-size: 1.125rem; margin-bottom: 2rem;">Join our community today and take the next step in your career journey</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'jobs:register' %}" class="btn" style="background: white; color: var(--primary-color);">Get Started</a>
+                <a href="{% url 'jobs:contact' %}" class="btn btn-outline" style="border-color: white; color: white;">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

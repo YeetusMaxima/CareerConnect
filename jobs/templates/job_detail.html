@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/job_detail.css">
+{% endblock %}
+
+{% block title %}{{ job.title }} - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="grid grid-3">
+            <!-- Main Content -->
+            <div style="grid-column: span 2;">
+                <div class="card">
+                    <div style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+                        {% if job.company_logo %}
+                            <img src="{{ job.company_logo.url }}" alt="{{ job.company_name }}" 
+                                 style="width: 100px; height: 100px; border-radius: 8px; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 100px; height: 100px; border-radius: 8px; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                                🏢
+                            </div>
+                        {% endif %}
+                        
+                        <div style="flex: 1;">
+                            <h1 style="margin-bottom: 0.5rem;">{{ job.title }}</h1>
+                            <h2 style="color: var(--gray-color); font-size: 1.25rem; font-weight: normal; margin-bottom: 1rem;">
+                                {{ job.company_name }}
+                            </h2>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                                <span class="tag tag-primary">{{ job.get_job_type_display }}</span>
+                                <span class="tag tag-success">{{ job.get_category_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="job-meta mb-3">
+                        <span class="job-meta-item">📍 {{ job.location }}</span>
+                        <span class="job-meta-item">💰 {{ job.salary_range }}</span>
+                        <span class="job-meta-item">💼 {{ job.experience_required }}+ years exp</span>
+                        <span class="job-meta-item">📅 Posted: {{ job.posted_date|date:"M d, Y" }}</span>
+                        {% if job.deadline %}
+                            <span class="job-meta-item">⏰ Deadline: {{ job.deadline|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Job Description</h3>
+                        <p style="white-space: pre-line; line-height: 1.8;">{{ job.description }}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Responsibilities</h3>
+                        <p style="white-space: pre-line; line-height: 1.8;">{{ job.responsibilities }}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Requirements</h3>
+                        <p style="white-space: pre-line; line-height: 1.8;">{{ job.requirements }}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 style="margin-bottom: 1rem;">Required Skills</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            {% for skill in job.skills_required.split %}
+                                <span class="tag tag-primary">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div>
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Apply for this job</h3>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user.profile.user_type == 'seeker' %}
+                            {% if has_applied %}
+                                <div class="message message-info">
+                                    You have already applied for this job
+                                </div>
+                                <a href="{% url 'jobs:seeker_dashboard' %}" class="btn btn-outline" style="width: 100%;">
+                                    View My Applications
+                                </a>
+                            {% else %}
+                                <a href="{% url 'jobs:apply_job' job.id %}" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                                    Apply Now
+                                </a>
+                                <button onclick="toggleSaveJob()" class="btn btn-outline" style="width: 100%;">
+                                    {% if is_saved %}
+                                        ❤️ Saved
+                                    {% else %}
+                                        🤍 Save Job
+                                    {% endif %}
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <div class="message message-warning">
+                                Only job seekers can apply for jobs
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p style="margin-bottom: 1rem;">Login to apply for this job</p>
+                        <a href="{% url 'jobs:login' %}?next={{ request.path }}" class="btn btn-primary" style="width: 100%;">
+                            Login
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="card mt-3">
+                    <h3 style="margin-bottom: 1rem;">Job Overview</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <div>
+                            <strong>Category:</strong><br>
+                            <span>{{ job.get_category_display }}</span>
+                        </div>
+                        <div>
+                            <strong>Job Type:</strong><br>
+                            <span>{{ job.get_job_type_display }}</span>
+                        </div>
+                        <div>
+                            <strong>Salary:</strong><br>
+                            <span>{{ job.salary_range }}</span>
+                        </div>
+                        <div>
+                            <strong>Experience:</strong><br>
+                            <span>{{ job.experience_required }}+ years</span>
+                        </div>
+                        <div>
+                            <strong>Location:</strong><br>
+                            <span>{{ job.location }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% block extra_js %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}
+
+<script>
+function toggleSaveJob() {
+    window.location.href = "{% url 'jobs:save_job' job.id %}";
+}
+</script>
+{% endblock %}

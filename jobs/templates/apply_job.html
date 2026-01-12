@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/forms.css">
+{% endblock %}
+
+{% block title %}Apply for {{ job.title }} - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <h2 class="mb-2">Apply for {{ job.title }}</h2>
+            <p style="color: var(--gray-color); margin-bottom: 2rem;">{{ job.company_name }}</p>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">Upload Resume *</label>
+                    {{ form.resume }}
+                    {% if form.resume.errors %}
+                        <div class="form-error">{{ form.resume.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Cover Letter *</label>
+                    {{ form.cover_letter }}
+                    {% if form.cover_letter.errors %}
+                        <div class="form-error">{{ form.cover_letter.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Contact Email *</label>
+                    {{ form.contact_email }}
+                    {% if form.contact_email.errors %}
+                        <div class="form-error">{{ form.contact_email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Contact Phone *</label>
+                    {{ form.contact_phone }}
+                    {% if form.contact_phone.errors %}
+                        <div class="form-error">{{ form.contact_phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                    <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    input[type="email"],
+    input[type="text"],
+    input[type="file"],
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+    textarea {
+        min-height: 150px;
+    }
+</style>
+{% endblock %}

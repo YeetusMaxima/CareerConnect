@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/pages/about_contact.css">
+{% endblock %}
+
+{% block title %}Contact Us - CareerConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="container">
+        <div class="grid grid-2">
+            <!-- Contact Form -->
+            <div>
+                <div class="card">
+                    <h2 class="mb-3">Get In Touch</h2>
+                    <p style="color: var(--gray-color); margin-bottom: 2rem;">
+                        Have questions or feedback? We'd love to hear from you!
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="form-error">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="form-error">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">Subject *</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="form-error">{{ form.subject.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">Message *</label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                                <div class="form-error">{{ form.message.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div>
+                <div class="card mb-3">
+                    <h3 class="mb-3">Contact Information</h3>
+                    
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div>
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📧</div>
+                            <strong>Email</strong>
+                            <p style="color: var(--gray-color);">support@careerconnect.com</p>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📞</div>
+                            <strong>Phone</strong>
+                            <p style="color: var(--gray-color);">+1 (555) 123-4567</p>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📍</div>
+                            <strong>Address</strong>
+                            <p style="color: var(--gray-color);">
+                                123 Career Street<br>
+                                Job City, JC 12345<br>
+                                Country
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏰</div>
+                            <strong>Business Hours</strong>
+                            <p style="color: var(--gray-color);">
+                                Monday - Friday: 9:00 AM - 6:00 PM<br>
+                                Saturday: 10:00 AM - 4:00 PM<br>
+                                Sunday: Closed
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="mb-2">Follow Us</h3>
+                    <p style="color: var(--gray-color); margin-bottom: 1rem;">
+                        Stay connected with us on social media for the latest updates and job opportunities.
+                    </p>
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="#" class="btn btn-outline btn-small">Facebook</a>
+                        <a href="#" class="btn btn-outline btn-small">Twitter</a>
+                        <a href="#" class="btn btn-outline btn-small">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+</style>
+{% endblock %}
