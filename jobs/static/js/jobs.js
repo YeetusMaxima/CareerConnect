@@ -548,7 +548,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  console.log("✅ CareerConnect JavaScript initialized successfully!");
 });
 
 
