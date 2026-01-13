@@ -132,3 +132,7 @@ DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 LOGIN_URL = 'jobs:login'  # or just '/login/' if that's your URL
 LOGIN_REDIRECT_URL = 'jobs:home'  # Where to redirect after login
 LOGOUT_REDIRECT_URL = 'jobs:home'  # Where to redirect after logout
+
+# Media Files (User Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -391,42 +391,78 @@ function initBackToTop() {
 }
 
 // ==================== IMAGE PREVIEW ====================
+// ==================== IMAGE PREVIEW & LABEL ====================
 function initImagePreview() {
   const imageInputs = document.querySelectorAll(
     'input[type="file"][accept*="image"]'
   );
 
   imageInputs.forEach((input) => {
-    input.addEventListener("change", function (e) {
-      const file = e.target.files[0];
+    const wrapper = input.parentNode;
+    let label = wrapper.querySelector(".file-input-label");
+
+    // Create label if not exists
+    if (!label) {
+      label = document.createElement("label");
+      label.className = "file-input-label";
+      label.textContent = "Upload Company Logo";
+      label.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 2px dashed #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 0.5rem;
+      `;
+      wrapper.appendChild(label);
+      label.appendChild(input); // move input inside label
+    }
+
+    // Create image preview element
+    let preview = wrapper.querySelector(".image-preview-img");
+    if (!preview) {
+      preview = document.createElement("img");
+      preview.className = "image-preview-img";
+      preview.style.cssText = `
+        max-width: 200px;
+        max-height: 200px;
+        margin-top: 1rem;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      `;
+      wrapper.appendChild(preview);
+      preview.style.display = "none"; // hide initially
+    }
+
+    // Update preview and label on file select
+    input.addEventListener("change", function () {
+      const file = input.files[0];
+
       if (file) {
         const reader = new FileReader();
-
-        reader.onload = function (event) {
-          let preview = input.parentNode.querySelector(".image-preview-img");
-
-          if (!preview) {
-            preview = document.createElement("img");
-            preview.className = "image-preview-img";
-            preview.style.cssText = `
-                            max-width: 200px;
-                            max-height: 200px;
-                            margin-top: 1rem;
-                            border-radius: 8px;
-                            border: 2px solid #e5e7eb;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                        `;
-            input.parentNode.appendChild(preview);
-          }
-
-          preview.src = event.target.result;
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.style.display = "block"; // show preview
         };
-
         reader.readAsDataURL(file);
+
+        label.textContent = file.name;
+        label.classList.add("has-file");
+      } else {
+        // Reset if no file
+        preview.src = "";
+        preview.style.display = "none";
+        label.textContent = "Upload Company Logo";
+        label.classList.remove("has-file");
       }
     });
   });
 }
+
 
 // ==================== UTILITY FUNCTIONS ====================
 function debounce(func, wait) {

@@ -7,85 +7,76 @@ document.addEventListener("DOMContentLoaded", function () {
   // ===================================
   // Mobile Navigation Toggle
   // ===================================
-  const createMobileMenu = () => {
+  function initMobileMenu() {
     const navbar = document.querySelector(".navbar");
     const navMenu = document.querySelector(".nav-menu");
 
     if (!navbar || !navMenu) return;
 
-    // Create hamburger button
-    const hamburger = document.createElement("button");
-    hamburger.className = "mobile-menu-toggle";
-    hamburger.innerHTML = `
-            <span></span>
-            <span></span>
-            <span></span>
-        `;
-    hamburger.setAttribute("aria-label", "Toggle navigation menu");
+    // Only add mobile menu on small screens
+    if (window.innerWidth <= 768) {
+      createMobileMenuButton();
+    }
 
-    // Insert hamburger before nav menu
-    navbar.insertBefore(hamburger, navMenu);
-
-    // Toggle menu on click
-    hamburger.addEventListener("click", () => {
-      navMenu.classList.toggle("active");
-      hamburger.classList.toggle("active");
-      document.body.classList.toggle("menu-open");
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!navbar.contains(e.target)) {
+    window.addEventListener("resize", function () {
+      const toggle = document.querySelector(".mobile-menu-toggle");
+      if (window.innerWidth <= 768 && !toggle) {
+        createMobileMenuButton();
+      } else if (window.innerWidth > 768 && toggle) {
+        toggle.remove();
         navMenu.classList.remove("active");
-        hamburger.classList.remove("active");
-        document.body.classList.remove("menu-open");
       }
     });
-  };
 
-  // Only create mobile menu on small screens
-  if (window.innerWidth <= 768) {
-    createMobileMenu();
+    function createMobileMenuButton() {
+      if (document.querySelector(".mobile-menu-toggle")) return;
+
+      const hamburger = document.createElement("button");
+      hamburger.className = "mobile-menu-toggle";
+      hamburger.setAttribute("aria-label", "Toggle menu");
+      hamburger.innerHTML = "<span></span><span></span><span></span>";
+
+      navbar.insertBefore(hamburger, navMenu);
+
+      hamburger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        navMenu.classList.toggle("active");
+        this.classList.toggle("active");
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!navbar.contains(e.target)) {
+          navMenu.classList.remove("active");
+          hamburger.classList.remove("active");
+        }
+      });
+    }
   }
 
-  window.addEventListener("resize", () => {
-    if (window.innerWidth <= 768) {
-      if (!document.querySelector(".mobile-menu-toggle")) {
-        createMobileMenu();
-      }
-    }
-  });
+  initMobileMenu();
 
   // ===================================
-  // Form Validation & Enhancement
+  // Form Validation
   // ===================================
   const forms = document.querySelectorAll("form");
 
   forms.forEach((form) => {
     const inputs = form.querySelectorAll("input, textarea, select");
 
+    // Real-time validation
     inputs.forEach((input) => {
-      // Add focus animation
-      input.addEventListener("focus", function () {
-        this.parentElement.classList.add("focused");
-      });
-
       input.addEventListener("blur", function () {
-        this.parentElement.classList.remove("focused");
-        if (this.value) {
-          this.parentElement.classList.add("filled");
-        } else {
-          this.parentElement.classList.remove("filled");
-        }
+        validateField(this);
       });
 
-      // Real-time validation
       input.addEventListener("input", function () {
-        validateField(this);
+        if (this.value) {
+          clearFieldError(this);
+        }
       });
     });
 
-    // Form submission validation
+    // Form submission
     form.addEventListener("submit", function (e) {
       let isValid = true;
 
@@ -97,12 +88,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (!isValid) {
         e.preventDefault();
-        showNotification("Please fix the errors in the form", "error");
       }
     });
   });
 
-  // Field validation function
   function validateField(field) {
     const value = field.value.trim();
     const type = field.type;
@@ -110,49 +99,25 @@ document.addEventListener("DOMContentLoaded", function () {
     let isValid = true;
     let errorMessage = "";
 
-    // Remove previous error
-    removeFieldError(field);
+    clearFieldError(field);
 
     if (required && !value) {
       isValid = false;
       errorMessage = "This field is required";
     } else if (value) {
-      switch (type) {
-        case "email":
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(value)) {
-            isValid = false;
-            errorMessage = "Please enter a valid email address";
-          }
-          break;
-
-        case "password":
-          if (value.length < 8) {
-            isValid = false;
-            errorMessage = "Password must be at least 8 characters";
-          }
-          break;
-
-        case "tel":
-          const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-          if (!phoneRegex.test(value)) {
-            isValid = false;
-            errorMessage = "Please enter a valid phone number";
-          }
-          break;
-
-        case "url":
-          try {
-            new URL(value);
-          } catch {
-            isValid = false;
-            errorMessage = "Please enter a valid URL";
-          }
-          break;
+      if (type === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          isValid = false;
+          errorMessage = "Please enter a valid email address";
+        }
+      } else if (type === "password" && value.length < 8) {
+        isValid = false;
+        errorMessage = "Password must be at least 8 characters";
       }
     }
 
-    // Check password confirmation
+    // Password confirmation
     if (field.name === "password2" || field.id === "id_password2") {
       const password1 = document.querySelector(
         'input[name="password1"], input[id="id_password1"]'
@@ -171,20 +136,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showFieldError(field, message) {
-    field.classList.add("error");
+    field.style.borderColor = "#ef4444";
 
-    // Check if error message already exists
     let errorDiv = field.parentElement.querySelector(".field-error");
     if (!errorDiv) {
       errorDiv = document.createElement("div");
       errorDiv.className = "field-error";
+      errorDiv.style.cssText =
+        "color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;";
       field.parentElement.appendChild(errorDiv);
     }
     errorDiv.textContent = message;
   }
 
-  function removeFieldError(field) {
-    field.classList.remove("error");
+  function clearFieldError(field) {
+    field.style.borderColor = "";
     const errorDiv = field.parentElement.querySelector(".field-error");
     if (errorDiv) {
       errorDiv.remove();
@@ -196,44 +162,135 @@ document.addEventListener("DOMContentLoaded", function () {
   // ===================================
   const messages = document.querySelectorAll(".message");
   messages.forEach((message) => {
-    setTimeout(() => {
-      message.style.animation = "slideOut 0.5s ease-out";
-      setTimeout(() => {
-        message.remove();
-      }, 500);
-    }, 5000);
-
     // Add close button
     const closeBtn = document.createElement("button");
     closeBtn.innerHTML = "×";
     closeBtn.className = "message-close";
+    closeBtn.style.cssText =
+      "background: none; border: none; color: inherit; font-size: 1.5rem; cursor: pointer; margin-left: auto; padding: 0 0.5rem;";
     closeBtn.onclick = () => {
       message.style.animation = "slideOut 0.5s ease-out";
       setTimeout(() => message.remove(), 500);
     };
     message.appendChild(closeBtn);
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      message.style.animation = "slideOut 0.5s ease-out";
+      setTimeout(() => message.remove(), 500);
+    }, 5000);
   });
 
   // ===================================
-  // File Input Enhancement
+  // File Input Display Name
   // ===================================
   const fileInputs = document.querySelectorAll('input[type="file"]');
   fileInputs.forEach((input) => {
-    const label = document.createElement("label");
-    label.className = "file-input-label";
-    label.innerHTML = `
-            <span class="file-icon">📎</span>
-            <span class="file-text">Choose file</span>
-            <span class="file-name"></span>
-        `;
-
-    input.parentElement.insertBefore(label, input.nextSibling);
-
     input.addEventListener("change", function () {
-      const fileName = this.files[0]?.name || "No file chosen";
-      label.querySelector(".file-name").textContent = fileName;
-      label.classList.add("has-file");
+      const fileName = this.files[0]?.name;
+      if (fileName) {
+        // Show filename next to input
+        let fileNameDisplay =
+          this.parentElement.querySelector(".file-name-display");
+        if (!fileNameDisplay) {
+          fileNameDisplay = document.createElement("div");
+          fileNameDisplay.className = "file-name-display";
+          fileNameDisplay.style.cssText =
+            "margin-top: 0.5rem; font-size: 0.875rem; color: #10b981;";
+          this.parentElement.appendChild(fileNameDisplay);
+        }
+        fileNameDisplay.textContent = "✓ " + fileName;
+      }
     });
+  });
+
+  // ===================================
+  // Image Preview for File Inputs
+  // ===================================
+  const imageInputs = document.querySelectorAll(
+    'input[type="file"][accept*="image"]'
+  );
+  imageInputs.forEach((input) => {
+    input.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          let preview = input.parentElement.querySelector(".image-preview");
+
+          if (!preview) {
+            preview = document.createElement("img");
+            preview.className = "image-preview";
+            preview.style.cssText =
+              "max-width: 200px; max-height: 200px; margin-top: 1rem; border-radius: 8px; border: 2px solid #e5e7eb;";
+            input.parentElement.appendChild(preview);
+          }
+
+          preview.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+
+  // ===================================
+  // Password Visibility Toggle
+  // ===================================
+  const passwordInputs = document.querySelectorAll('input[type="password"]');
+  passwordInputs.forEach((input) => {
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "relative";
+    input.parentElement.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.innerHTML = "👁️";
+    toggleBtn.style.cssText =
+      "position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem;";
+    toggleBtn.setAttribute("aria-label", "Toggle password visibility");
+
+    wrapper.appendChild(toggleBtn);
+
+    toggleBtn.addEventListener("click", function () {
+      if (input.type === "password") {
+        input.type = "text";
+        toggleBtn.innerHTML = "🙈";
+      } else {
+        input.type = "password";
+        toggleBtn.innerHTML = "👁️";
+      }
+    });
+  });
+
+  // ===================================
+  // Character Counter for Textareas
+  // ===================================
+  const textareas = document.querySelectorAll("textarea[maxlength]");
+  textareas.forEach((textarea) => {
+    const maxLength = textarea.getAttribute("maxlength");
+
+    const counter = document.createElement("div");
+    counter.className = "char-counter";
+    counter.style.cssText =
+      "text-align: right; font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;";
+    textarea.parentElement.appendChild(counter);
+
+    function updateCounter() {
+      const count = textarea.value.length;
+      counter.textContent = `${count} / ${maxLength}`;
+
+      if (count > maxLength * 0.9) {
+        counter.style.color = "#ef4444";
+      } else {
+        counter.style.color = "#6b7280";
+      }
+    }
+
+    updateCounter();
+    textarea.addEventListener("input", updateCounter);
   });
 
   // ===================================
@@ -256,68 +313,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ===================================
-  // Search Form Enhancement
-  // ===================================
-  const searchForm = document.querySelector(".search-form");
-  if (searchForm) {
-    const inputs = searchForm.querySelectorAll("input, select");
-
-    inputs.forEach((input) => {
-      input.addEventListener(
-        "input",
-        debounce(() => {
-          // You can add auto-search functionality here if needed
-        }, 300)
-      );
-    });
-  }
-
-  // ===================================
-  // Job Cards Animation on Scroll
-  // ===================================
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: "0px 0px -50px 0px",
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = "0";
-        entry.target.style.transform = "translateY(20px)";
-
-        setTimeout(() => {
-          entry.target.style.transition = "all 0.6s ease-out";
-          entry.target.style.opacity = "1";
-          entry.target.style.transform = "translateY(0)";
-        }, 100);
-
-        observer.unobserve(entry.target);
-      }
-    });
-  }, observerOptions);
-
-  // Observe job cards and other cards
-  const cards = document.querySelectorAll(".job-card, .card");
-  cards.forEach((card, index) => {
-    card.style.transitionDelay = `${index * 0.1}s`;
-    observer.observe(card);
-  });
-
-  // ===================================
-  // Table Responsive Enhancement
-  // ===================================
-  const tables = document.querySelectorAll("table");
-  tables.forEach((table) => {
-    if (!table.parentElement.classList.contains("table")) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "table-responsive";
-      table.parentElement.insertBefore(wrapper, table);
-      wrapper.appendChild(table);
-    }
-  });
-
-  // ===================================
   // Confirmation Dialogs
   // ===================================
   const deleteButtons = document.querySelectorAll(
@@ -336,105 +331,48 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ===================================
-  // Character Counter for Textareas
+  // Back to Top Button
   // ===================================
-  const textareas = document.querySelectorAll("textarea");
-  textareas.forEach((textarea) => {
-    const maxLength = textarea.getAttribute("maxlength");
-    if (maxLength) {
-      const counter = document.createElement("div");
-      counter.className = "char-counter";
-      counter.textContent = `0 / ${maxLength}`;
-      textarea.parentElement.appendChild(counter);
+  const backToTopBtn = document.createElement("button");
+  backToTopBtn.className = "back-to-top";
+  backToTopBtn.innerHTML = "↑";
+  backToTopBtn.setAttribute("aria-label", "Back to top");
+  backToTopBtn.style.cssText = `
+        position: fixed;
+        bottom: -50px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 999;
+    `;
 
-      textarea.addEventListener("input", function () {
-        const count = this.value.length;
-        counter.textContent = `${count} / ${maxLength}`;
+  document.body.appendChild(backToTopBtn);
 
-        if (count > maxLength * 0.9) {
-          counter.style.color = "var(--danger-color)";
-        } else {
-          counter.style.color = "var(--gray-color)";
-        }
-      });
+  window.addEventListener("scroll", () => {
+    if (window.pageYOffset > 300) {
+      backToTopBtn.style.bottom = "20px";
+    } else {
+      backToTopBtn.style.bottom = "-50px";
     }
   });
 
-  // ===================================
-  // Dynamic Search/Filter
-  // ===================================
-  const filterForm = document.querySelector(".filters form");
-  if (filterForm) {
-    const filterInputs = filterForm.querySelectorAll("input, select");
-
-    filterInputs.forEach((input) => {
-      input.addEventListener(
-        "change",
-        debounce(() => {
-          // Auto-submit form on filter change
-          // Uncomment if you want auto-filtering:
-          // filterForm.submit();
-        }, 500)
-      );
-    });
-  }
-
-  // ===================================
-  // Notification System
-  // ===================================
-  window.showNotification = function (message, type = "info") {
-    const notification = document.createElement("div");
-    notification.className = `message message-${type}`;
-    notification.textContent = message;
-
-    const closeBtn = document.createElement("button");
-    closeBtn.innerHTML = "×";
-    closeBtn.className = "message-close";
-    closeBtn.onclick = () => notification.remove();
-    notification.appendChild(closeBtn);
-
-    const container = document.querySelector(".container");
-    if (container) {
-      container.insertBefore(notification, container.firstChild);
-
-      setTimeout(() => {
-        notification.style.animation = "slideOut 0.5s ease-out";
-        setTimeout(() => notification.remove(), 500);
-      }, 5000);
-    }
-  };
-
-  // ===================================
-  // Password Visibility Toggle
-  // ===================================
-  const passwordInputs = document.querySelectorAll('input[type="password"]');
-  passwordInputs.forEach((input) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "password-wrapper";
-    input.parentElement.insertBefore(wrapper, input);
-    wrapper.appendChild(input);
-
-    const toggleBtn = document.createElement("button");
-    toggleBtn.type = "button";
-    toggleBtn.className = "password-toggle";
-    toggleBtn.innerHTML = "👁️";
-    toggleBtn.setAttribute("aria-label", "Toggle password visibility");
-
-    wrapper.appendChild(toggleBtn);
-
-    toggleBtn.addEventListener("click", function () {
-      if (input.type === "password") {
-        input.type = "text";
-        toggleBtn.innerHTML = "🙈";
-      } else {
-        input.type = "password";
-        toggleBtn.innerHTML = "👁️";
-      }
+  backToTopBtn.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
     });
   });
 
   // ===================================
-  // Loading State for Forms
+  // Loading State for Submit Buttons
   // ===================================
   const submitButtons = document.querySelectorAll('button[type="submit"]');
   submitButtons.forEach((button) => {
@@ -456,98 +394,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // ===================================
-  // Utility Functions
-  // ===================================
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  // ===================================
-  // Back to Top Button
-  // ===================================
-  const createBackToTop = () => {
-    const button = document.createElement("button");
-    button.className = "back-to-top";
-    button.innerHTML = "↑";
-    button.setAttribute("aria-label", "Back to top");
-    document.body.appendChild(button);
-
-    window.addEventListener("scroll", () => {
-      if (window.pageYOffset > 300) {
-        button.classList.add("visible");
-      } else {
-        button.classList.remove("visible");
-      }
-    });
-
-    button.addEventListener("click", () => {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    });
-  };
-
-  createBackToTop();
-
-  // ===================================
-  // Print Functionality
-  // ===================================
-  window.printPage = function () {
-    window.print();
-  };
-
-  // ===================================
-  // Copy to Clipboard
-  // ===================================
-  window.copyToClipboard = function (text) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showNotification("Copied to clipboard!", "success");
-      })
-      .catch(() => {
-        showNotification("Failed to copy", "error");
-      });
-  };
-
-  // ===================================
-  // Initialize Tooltips (if needed)
-  // ===================================
-  const tooltipElements = document.querySelectorAll("[data-tooltip]");
-  tooltipElements.forEach((element) => {
-    element.addEventListener("mouseenter", function () {
-      const tooltip = document.createElement("div");
-      tooltip.className = "tooltip";
-      tooltip.textContent = this.getAttribute("data-tooltip");
-      document.body.appendChild(tooltip);
-
-      const rect = this.getBoundingClientRect();
-      tooltip.style.top = `${rect.top - tooltip.offsetHeight - 5}px`;
-      tooltip.style.left = `${
-        rect.left + rect.width / 2 - tooltip.offsetWidth / 2
-      }px`;
-
-      this._tooltip = tooltip;
-    });
-
-    element.addEventListener("mouseleave", function () {
-      if (this._tooltip) {
-        this._tooltip.remove();
-        this._tooltip = null;
-      }
-    });
-  });
-
+  console.log("✅ CareerConnect JavaScript initialized successfully!");
 });
 
-
+// ===================================
+// Add necessary animations
+// ===================================
+const style = document.createElement("style");
+style.textContent = `
+    @keyframes slideOut {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
