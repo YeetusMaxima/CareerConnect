@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ user.username }} - User Detail{% endblock %}
+
+{% block content %}
+<!-- User Header -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem;">
+                {{ user.username.0|upper }}
+            </div>
+            <div>
+                <h2 style="margin: 0; font-size: 1.75rem;">{{ user.username }}</h2>
+                <div style="color: var(--text-secondary); margin-top: 0.5rem;">
+                    {{ user.email }}
+                </div>
+                <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                    <span class="badge {% if profile.user_type == 'seeker' %}badge-blue{% else %}badge-green{% endif %}">
+                        {{ profile.get_user_type_display }}
+                    </span>
+                    {% if user.is_active %}
+                        <span class="badge badge-green">Active</span>
+                    {% else %}
+                        <span class="badge badge-red">Inactive</span>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <span class="badge badge-purple">Admin</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <form method="post" action="{% url 'admin_panel:toggle_user_status' user.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-small {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
+                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+            </form>
+            <a href="{% url 'admin_panel:delete_user' user.id %}" class="btn btn-small btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- User Information -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Basic Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Full Name</div>
+                    <div style="font-weight: 600;">{{ user.get_full_name|default:"Not provided" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Username</div>
+                    <div style="font-weight: 600;">{{ user.username }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Email</div>
+                    <div style="font-weight: 600;">{{ user.email }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Phone</div>
+                    <div style="font-weight: 600;">{{ profile.phone|default:"Not provided" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-calendar"></i> Account Details</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">User ID</div>
+                    <div style="font-weight: 600; font-family: monospace;">{{ user.id }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Date Joined</div>
+                    <div style="font-weight: 600;">{{ user.date_joined|date:"F d, Y" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Last Login</div>
+                    <div style="font-weight: 600;">{{ user.last_login|date:"F d, Y H:i"|default:"Never" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Account Status</div>
+                    <div>
+                        {% if user.is_active %}
+                            <span class="badge badge-green">Active</span>
+                        {% else %}
+                            <span class="badge badge-red">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Seeker Activity -->
+{% if profile.user_type == 'seeker' %}
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">Applications ({{ applications.count }})</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin_panel:job_detail' app.job.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                        {{ app.job.title }}
+                    </a>
+                </td>
+                <td>
+                    <span class="badge 
+                        {% if app.status == 'pending' %}badge-orange
+                        {% elif app.status == 'shortlisted' %}badge-green
+                        {% elif app.status == 'rejected' %}badge-red
+                        {% else %}badge-blue{% endif %}">
+                        {{ app.get_status_display }}
+                    </span>
+                </td>
+                <td style="color: var(--text-secondary);">{{ app.applied_date|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'admin_panel:application_detail' app.id %}" class="btn btn-small btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No applications yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">Saved Jobs ({{ saved_jobs.count }})</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Saved Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for saved in saved_jobs %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin_panel:job_detail' saved.job.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                        {{ saved.job.title }}
+                    </a>
+                </td>
+                <td>{{ saved.job.company_name }}</td>
+                <td style="color: var(--text-secondary);">{{ saved.saved_date|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No saved jobs yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Employer Activity -->
+{% if profile.user_type == 'employer' %}
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">Posted Jobs ({{ posted_jobs.count }})</h3>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Status</th>
+                <th>Applications</th>
+                <th>Posted Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in posted_jobs %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin_panel:job_detail' job.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                        {{ job.title }}
+                    </a>
+                </td>
+                <td>
+                    <span class="badge {% if job.is_active %}badge-green{% else %}badge-red{% endif %}">
+                        {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>{{ job.application_set.count }} applications</td>
+                <td style="color: var(--text-secondary);">{{ job.posted_date|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'admin_panel:job_detail' job.id %}" class="btn btn-small btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No jobs posted yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

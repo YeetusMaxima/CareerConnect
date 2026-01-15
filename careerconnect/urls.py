@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jobs.urls')),
+    path('admin-panel/', include('admin_panel.urls')),  # ← Add this
 ]
 
 if settings.DEBUG:

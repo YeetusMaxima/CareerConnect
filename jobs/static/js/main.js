@@ -418,7 +418,7 @@ function initImagePreview() {
         margin-top: 0.5rem;
       `;
       wrapper.appendChild(label);
-      label.appendChild(input); // move input inside label
+      label.appendChild(input); 
     }
 
     // Create image preview element

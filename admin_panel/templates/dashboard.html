@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_users }}</div>
+        <div class="stat-label">Total Users</div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--accent-green);">
+            +{{ new_users_this_week }} this week
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_jobs }}</div>
+        <div class="stat-label">Total Jobs</div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--accent-green);">
+            {{ stats.active_jobs }} active
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_applications }}</div>
+        <div class="stat-label">Applications</div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--accent-orange);">
+            {{ stats.pending_applications }} pending
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_contacts }}</div>
+        <div class="stat-label">Contact Messages</div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--accent-red);">
+            {{ stats.unresolved_contacts }} unresolved
+        </div>
+    </div>
+</div>
+
+<!-- User Type Breakdown -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_seekers }}</div>
+        <div class="stat-label">Job Seekers</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fas fa-building"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_employers }}</div>
+        <div class="stat-label">Employers</div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <!-- Recent Users -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3 class="table-title">Recent Users</h3>
+            <a href="{% url 'admin_panel:manage_users' %}" class="btn btn-small btn-primary">View All</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Type</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in recent_users %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin_panel:user_detail' user.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                            {{ user.username }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge {% if user.profile.user_type == 'seeker' %}badge-blue{% else %}badge-green{% endif %}">
+                            {{ user.profile.get_user_type_display }}
+                        </span>
+                    </td>
+                    <td style="color: var(--text-secondary); font-size: 0.875rem;">{{ user.date_joined|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-secondary);">No users yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Jobs -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3 class="table-title">Recent Jobs</h3>
+            <a href="{% url 'admin_panel:manage_jobs' %}" class="btn btn-small btn-primary">View All</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th>Status</th>
+                    <th>Posted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in recent_jobs %}
+                <tr>
+                    <td>
+                        <a href="{% url 'admin_panel:job_detail' job.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                            {{ job.title|truncatewords:5 }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge {% if job.is_active %}badge-green{% else %}badge-red{% endif %}">
+                            {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td style="color: var(--text-secondary); font-size: 0.875rem;">{{ job.posted_date|date:"M d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-secondary);">No jobs yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="table-container" style="margin-top: 1.5rem;">
+    <div class="table-header">
+        <h3 class="table-title">Recent Applications</h3>
+        <a href="{% url 'admin_panel:manage_applications' %}" class="btn btn-small btn-primary">View All</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Applicant</th>
+                <th>Job</th>
+                <th>Status</th>
+                <th>Applied</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in recent_applications %}
+            <tr>
+                <td>{{ app.applicant.username }}</td>
+                <td>{{ app.job.title|truncatewords:5 }}</td>
+                <td>
+                    <span class="badge 
+                        {% if app.status == 'pending' %}badge-orange
+                        {% elif app.status == 'shortlisted' %}badge-green
+                        {% elif app.status == 'rejected' %}badge-red
+                        {% else %}badge-blue{% endif %}">
+                        {{ app.get_status_display }}
+                    </span>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.875rem;">{{ app.applied_date|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'admin_panel:application_detail' app.id %}" class="btn btn-small btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-secondary);">No applications yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Recent Contacts -->
+<div class="table-container" style="margin-top: 1.5rem;">
+    <div class="table-header">
+        <h3 class="table-title">Recent Contact Messages</h3>
+        <a href="{% url 'admin_panel:manage_contacts' %}" class="btn btn-small btn-primary">View All</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contact in recent_contacts %}
+            <tr>
+                <td>{{ contact.name }}</td>
+                <td>{{ contact.subject|truncatewords:5 }}</td>
+                <td>
+                    <span class="badge {% if contact.is_resolved %}badge-green{% else %}badge-orange{% endif %}">
+                        {% if contact.is_resolved %}Resolved{% else %}Pending{% endif %}
+                    </span>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.875rem;">{{ contact.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'admin_panel:contact_detail' contact.id %}" class="btn btn-small btn-primary">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-secondary);">No contact messages yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Auto-hide messages after 5 seconds
+setTimeout(() => {
+    const messages = document.querySelector('.messages');
+    if (messages) {
+        messages.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => messages.remove(), 300);
+    }
+}, 5000);
+</script>
+
+<style>
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+</style>
+{% endblock %}

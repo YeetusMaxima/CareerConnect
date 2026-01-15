@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block content %}
+
+<!-- ================= OVERVIEW ================= -->
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+        <div class="text-muted">{{ seekers }} seekers, {{ employers }} employers</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fas fa-briefcase"></i></div>
+        <div class="stat-value">{{ total_jobs }}</div>
+        <div class="stat-label">Total Jobs</div>
+        <div class="text-success">{{ active_jobs }} active</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fas fa-file-alt"></i></div>
+        <div class="stat-value">{{ total_applications }}</div>
+        <div class="stat-label">Total Applications</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fas fa-chart-line"></i></div>
+        <div class="stat-value">{{ avg_apps_per_job|floatformat:1 }}</div>
+        <div class="stat-label">Avg Applications / Job</div>
+    </div>
+
+</div>
+
+<!-- ================= USER TYPES ================= -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-users"></i> User Distribution</h3>
+    </div>
+
+    <div class="card-body">
+
+        <p>Job Seekers ({{ seekers }})</p>
+        <div class="progress">
+            <div class="progress-bar blue" style="width: {{ seekers_pct }}%;"></div>
+        </div>
+        <small>{{ seekers_pct|floatformat:1 }}%</small>
+
+        <p style="margin-top:1rem;">Employers ({{ employers }})</p>
+        <div class="progress">
+            <div class="progress-bar green" style="width: {{ employers_pct }}%;"></div>
+        </div>
+        <small>{{ employers_pct|floatformat:1 }}%</small>
+
+    </div>
+</div>
+
+<!-- ================= JOB STATUS ================= -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-briefcase"></i> Job Status</h3>
+    </div>
+
+    <div class="card-body">
+
+        <p>Active Jobs ({{ active_jobs }})</p>
+        <div class="progress">
+            <div class="progress-bar green" style="width: {{ active_jobs_pct }}%;"></div>
+        </div>
+
+        <p style="margin-top:1rem;">Inactive Jobs ({{ inactive_jobs }})</p>
+        <div class="progress">
+            <div class="progress-bar red" style="width: {{ inactive_jobs_pct }}%;"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= APPLICATION STATUS ================= -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Applications by Status</h3>
+    </div>
+
+    <div class="card-body">
+        {% for item in applications_by_status %}
+            <p>{{ item.status }} ({{ item.count }})</p>
+
+            {% if item.status == 'pending' %}
+                <div class="progress-bar orange" style="width: {{ item.pct }}%;"></div>
+            {% elif item.status == 'shortlisted' %}
+                <div class="progress-bar green" style="width: {{ item.pct }}%;"></div>
+            {% elif item.status == 'rejected' %}
+                <div class="progress-bar red" style="width: {{ item.pct }}%;"></div>
+            {% else %}
+                <div class="progress-bar blue" style="width: {{ item.pct }}%;"></div>
+            {% endif %}
+
+        {% empty %}
+            <p class="text-muted">No data</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

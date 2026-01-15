@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ job.title }} - Job Detail{% endblock %}
+
+{% block content %}
+<!-- Job Header -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.75rem;">{{ job.title }}</h2>
+            <div style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.1rem;">
+                {{ job.company_name }}
+            </div>
+            <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="badge badge-blue">{{ job.get_category_display }}</span>
+                <span class="badge badge-purple">{{ job.get_job_type_display }}</span>
+                <span class="badge {% if job.is_active %}badge-green{% else %}badge-red{% endif %}">
+                    {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                <span class="badge badge-orange">{{ applications.count }} Applications</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <form method="post" action="{% url 'admin_panel:toggle_job_status' job.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-small {% if job.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fas fa-{% if job.is_active %}ban{% else %}check{% endif %}"></i>
+                    {% if job.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+            </form>
+            <a href="{% url 'admin_panel:delete_job' job.id %}" class="btn btn-small btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Job Information -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Job Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-info-circle"></i> Job Details</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Job ID</div>
+                    <div style="font-weight: 600; font-family: monospace;">{{ job.id }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Location</div>
+                    <div style="font-weight: 600;"><i class="fas fa-map-marker-alt"></i> {{ job.location }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Job Type</div>
+                    <div style="font-weight: 600;">{{ job.get_job_type_display }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Category</div>
+                    <div style="font-weight: 600;">{{ job.get_category_display }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Salary Range</div>
+                    <div style="font-weight: 600; color: var(--accent-green);">
+                        ${{ job.salary_min|floatformat:0|default:"N/A" }} - ${{ job.salary_max|floatformat:0|default:"N/A" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employer Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-building"></i> Employer Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Employer</div>
+                    <div style="font-weight: 600;">
+                        <a href="{% url 'admin_panel:user_detail' job.employer.id %}" style="color: var(--accent-blue); text-decoration: none;">
+                            {{ job.employer.username }}
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Company</div>
+                    <div style="font-weight: 600;">{{ job.company_name }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Email</div>
+                    <div style="font-weight: 600;">{{ job.employer.email }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Posted Date</div>
+                    <div style="font-weight: 600;">{{ job.posted_date|date:"F d, Y" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Status</div>
+                    <div>
+                        <span class="badge {% if job.is_active %}badge-green{% else %}badge-red{% endif %}">
+                            {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Description -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-file-alt"></i> Job Description</h3>
+    </div>
+    <div class="card-body">
+        <div style="line-height: 1.8; white-space: pre-wrap;">{{ job.description }}</div>
+    </div>
+</div>
+
+<!-- Requirements & Skills -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-clipboard-check"></i> Requirements</h3>
+        </div>
+        <div class="card-body">
+            <div style="line-height: 1.8; white-space: pre-wrap;">{{ job.requirements|default:"No specific requirements listed" }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-tools"></i> Required Skills</h3>
+        </div>
+        <div class="card-body">
+            <div style="line-height: 1.8; white-space: pre-wrap;">{{ job.skills_required|default:"No specific skills listed" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Applications -->
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">Applications ({{ applications.count }})</h3>
+        <a href="{% url 'admin_panel:manage_applications' %}?job={{ job.id }}" class="btn btn-small btn-primary">
+            View All Applications
+        </a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Applicant</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin_panel:user_detail' app.applicant.id %}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">
+                        {{ app.applicant.username }}
+                    </a>
+                </td>
+                <td style="color: var(--text-secondary);">{{ app.contact_email }}</td>
+                <td style="color: var(--text-secondary);">{{ app.contact_phone }}</td>
+                <td>
+                    <span class="badge 
+                        {% if app.status == 'pending' %}badge-orange
+                        {% elif app.status == 'shortlisted' %}badge-green
+                        {% elif app.status == 'rejected' %}badge-red
+                        {% else %}badge-blue{% endif %}">
+                        {{ app.get_status_display }}
+                    </span>
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.875rem;">
+                    {{ app.applied_date|date:"M d, Y" }}
+                </td>
+                <td>
+                    <a href="{% url 'admin_panel:application_detail' app.id %}" class="btn btn-small btn-primary">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <div>No applications yet</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

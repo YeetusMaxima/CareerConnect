@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Contact Message Detail{% endblock %}
+
+{% block content %}
+<!-- Contact Header -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.75rem;">{{ contact.subject }}</h2>
+            <div style="color: var(--text-secondary); margin-top: 0.5rem;">
+                From: {{ contact.name }} &lt;{{ contact.email }}&gt;
+            </div>
+            <div style="margin-top: 0.75rem;">
+                <span class="badge {% if contact.is_resolved %}badge-green{% else %}badge-orange{% endif %}">
+                    {% if contact.is_resolved %}Resolved{% else %}Pending{% endif %}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <form method="post" action="{% url 'admin_panel:toggle_contact_status' contact.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-small {% if contact.is_resolved %}btn-primary{% else %}btn-success{% endif %}">
+                    <i class="fas fa-{% if contact.is_resolved %}undo{% else %}check{% endif %}"></i>
+                    {% if contact.is_resolved %}Mark as Unresolved{% else %}Mark as Resolved{% endif %}
+                </button>
+            </form>
+            <a href="{% url 'admin_panel:delete_contact' contact.id %}" class="btn btn-small btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Information -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Sender Information -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-user"></i> Sender Information</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Name</div>
+                    <div style="font-weight: 600;">{{ contact.name }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Email</div>
+                    <div style="font-weight: 600;">
+                        <a href="mailto:{{ contact.email }}" style="color: var(--accent-blue); text-decoration: none;">
+                            {{ contact.email }}
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Phone</div>
+                    <div style="font-weight: 600;">
+                        {% if contact.phone %}
+                            <a href="tel:{{ contact.phone }}" style="color: var(--accent-blue); text-decoration: none;">
+                                {{ contact.phone }}
+                            </a>
+                        {% else %}
+                            <span style="color: var(--text-secondary);">Not provided</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-info-circle"></i> Message Details</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; gap: 1rem;">
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Message ID</div>
+                    <div style="font-weight: 600; font-family: monospace;">{{ contact.id }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Received Date</div>
+                    <div style="font-weight: 600;">{{ contact.created_at|date:"F d, Y H:i" }}</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Time Since</div>
+                    <div style="font-weight: 600;">{{ contact.created_at|timesince }} ago</div>
+                </div>
+                <div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.25rem;">Status</div>
+                    <div>
+                        <span class="badge {% if contact.is_resolved %}badge-green{% else %}badge-orange{% endif %}">
+                            {% if contact.is_resolved %}Resolved{% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-heading"></i> Subject</h3>
+    </div>
+    <div class="card-body">
+        <div style="font-size: 1.1rem; font-weight: 600;">{{ contact.subject }}</div>
+    </div>
+</div>
+
+<!-- Message Content -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-envelope-open-text"></i> Message</h3>
+    </div>
+    <div class="card-body">
+        <div style="line-height: 1.8; white-space: pre-wrap; font-size: 1rem;">{{ contact.message }}</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h3>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="mailto:{{ contact.email }}?subject=Re: {{ contact.subject|urlencode }}" class="btn btn-primary">
+                <i class="fas fa-reply"></i> Reply via Email
+            </a>
+            
+            {% if contact.phone %}
+            <a href="tel:{{ contact.phone }}" class="btn btn-primary">
+                <i class="fas fa-phone"></i> Call {{ contact.name }}
+            </a>
+            {% endif %}
+            
+            <a href="mailto:{{ contact.email }}" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Send New Email
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Resolution Notes (Optional) -->
+{% if contact.is_resolved %}
+<div class="card" style="border-color: var(--accent-green);">
+    <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
+        <h3 class="card-title" style="color: var(--accent-green);">
+            <i class="fas fa-check-circle"></i> Resolved
+        </h3>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--accent-green); margin: 0;">
+            This contact message has been marked as resolved.
+        </p>
+    </div>
+</div>
+{% else %}
+<div class="card" style="border-color: var(--accent-orange);">
+    <div class="card-header" style="background: rgba(245, 158, 11, 0.1);">
+        <h3 class="card-title" style="color: var(--accent-orange);">
+            <i class="fas fa-clock"></i> Pending Response
+        </h3>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--accent-orange); margin: 0;">
+            This message is still pending. Don't forget to follow up with {{ contact.name }}!
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

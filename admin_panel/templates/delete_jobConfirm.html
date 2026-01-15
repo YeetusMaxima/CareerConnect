@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Delete Job - Confirmation{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 2rem auto;">
+    <div class="card-header">
+        <h3 class="card-title" style="color: var(--accent-red);">
+            <i class="fas fa-exclamation-triangle"></i> Confirm Job Deletion
+        </h3>
+    </div>
+    <div class="card-body">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-red); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0; color: var(--accent-red); font-weight: 600;">
+                <i class="fas fa-exclamation-circle"></i> Warning: This action cannot be undone!
+            </p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                Are you sure you want to delete the following job?
+            </p>
+            
+            <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1.5rem; border: 1px solid var(--border-color);">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem;">{{ job.title }}</h3>
+                <div style="color: var(--text-secondary); margin-bottom: 1rem;">{{ job.company_name }}</div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <span class="badge badge-blue">{{ job.get_category_display }}</span>
+                    <span class="badge badge-purple">{{ job.get_job_type_display }}</span>
+                    <span class="badge {% if job.is_active %}badge-green{% else %}badge-red{% endif %}">
+                        {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                
+                <div style="display: grid; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Location:</span>
+                        <span style="font-weight: 600;">{{ job.location }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Employer:</span>
+                        <span style="font-weight: 600;">{{ job.employer.username }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Posted:</span>
+                        <span style="font-weight: 600;">{{ job.posted_date|date:"F d, Y" }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Applications:</span>
+                        <span class="badge badge-orange">{{ job.application_set.count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-orange); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+            <p style="margin: 0; color: var(--accent-orange); font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Note:</strong> Deleting this job will also delete:
+            </p>
+            <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--accent-orange);">
+                <li>All {{ job.application_set.count }} application(s) to this job</li>
+                <li>All saved references to this job</li>
+                <li>Job posting and all related data</li>
+            </ul>
+        </div>
+
+        <form method="post" style="display: flex; gap: 1rem; justify-content: flex-end;">
+            {% csrf_token %}
+            <a href="{% url 'admin_panel:job_detail' job.id %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Yes, Delete Job
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
