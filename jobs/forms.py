@@ -6,7 +6,25 @@ from .models import UserProfile, Job, Application, Contact
 
 class UserRegistrationForm(UserCreationForm):
     """User registration form with user type selection"""
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Enter your email'
+        })
+    )
+    
+    # ✅ ADDED: Phone number field
+    phone = forms.CharField(
+        max_length=15,
+        required=False,  # Optional field
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Enter your phone number',
+            'type': 'tel'
+        })
+    )
+    
     user_type = forms.ChoiceField(
         choices=UserProfile.USER_TYPES,
         widget=forms.RadioSelect,
@@ -15,7 +33,24 @@ class UserRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'user_type']
+        fields = ['username', 'email', 'phone', 'password1', 'password2']  # ✅ Added 'phone'
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Choose a username'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Enter password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Confirm password'
+        })
 
 
 class JobSeekerProfileForm(forms.ModelForm):

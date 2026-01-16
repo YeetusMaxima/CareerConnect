@@ -60,7 +60,15 @@ def register(request):
         if form.is_valid():
             user = form.save()
             user_type = form.cleaned_data.get('user_type')
-            UserProfile.objects.create(user=user, user_type=user_type)
+            phone = form.cleaned_data.get('phone')  # ✅ ADDED: Get phone from form
+            
+            # ✅ UPDATED: Save phone to profile
+            UserProfile.objects.create(
+                user=user, 
+                user_type=user_type,
+                phone=phone  # ✅ ADDED: Save phone
+            )
+            
             messages.success(request, 'Account created successfully! Please log in.')
             return redirect('jobs:login')
     else:
