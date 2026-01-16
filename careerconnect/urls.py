@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jobs.urls')),
     path('admin-panel/', include('admin_panel.urls')),  # ← Add this
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
 
 if settings.DEBUG:

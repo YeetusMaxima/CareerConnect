@@ -70,7 +70,10 @@ def register(request):
 
 
 def user_login(request):
+    # ✅ If already logged in, redirect based on user type
     if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('admin_panel:dashboard')
         return redirect('jobs:home')
 
     if request.method == 'POST':
@@ -80,7 +83,15 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
+            
+            # ✅ ADMIN REDIRECT: Check if user is superuser/admin
+            if user.is_superuser:
+                messages.success(request, f'Welcome back, Admin {user.username}!')
+                return redirect('admin_panel:dashboard')
+            
+            # Regular user redirect
             next_url = request.GET.get('next', 'jobs:home')
+            messages.success(request, f'Welcome back, {user.username}!')
             return redirect(next_url)
         else:
             messages.error(request, 'Invalid username or password')
@@ -98,7 +109,7 @@ def user_logout(request):
 # Jobs – Listing & Detail
 # =========================
 
-@login_required  # ✅ ADDED LOGIN REQUIRED
+@login_required
 def job_listings(request):
     form = JobSearchForm(request.GET)
     jobs = Job.objects.filter(is_active=True)
@@ -139,7 +150,7 @@ def job_listings(request):
     })
 
 
-@login_required  # ✅ ADDED LOGIN REQUIRED
+@login_required
 def job_detail(request, job_id):
     job = get_object_or_404(Job, id=job_id, is_active=True)
 

@@ -157,11 +157,11 @@ body {
 }
 
 /* ===================================
-   STATS CARDS
+   STATS CARDS - 4 COLUMNS FIXED
    =================================== */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, 1fr); /* ← CHANGED: Always 4 columns */
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -375,21 +375,4 @@ tbody tr:hover {
 .search-input:focus {
     outline: none;
     border-color: var(--accent-blue);
-}
-
-/* ===================================
-   RESPONSIVE
-   =================================== */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
-
-    .main-content {
-        margin-left: 0;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
 }

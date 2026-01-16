@@ -1,4 +1,3 @@
-
 /* ===================================
    CSS VARIABLES & THEME
    =================================== */
@@ -73,6 +72,7 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
@@ -81,6 +81,16 @@ body {
     line-height: 1.6;
     background-color: var(--white);
     overflow-x: hidden;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===================================
+   MAIN CONTENT WRAPPER
+   =================================== */
+main {
+    flex: 1 0 auto;
 }
 
 img {
@@ -175,6 +185,7 @@ ul {
     top: 0;
     z-index: 1000;
     border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
 }
 
 .navbar {
@@ -831,8 +842,9 @@ tbody tr:hover {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: rgba(255, 255, 255, 0.8);
     padding: 4rem 0 2rem;
-    margin-top: 5rem;
+    margin-top: auto;
     border-top: 4px solid var(--primary-color);
+    flex-shrink: 0;
 }
 
 .footer-content {
