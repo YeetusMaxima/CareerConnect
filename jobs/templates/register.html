@@ -12,9 +12,27 @@
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- ✅ NEW: First Name -->
+                    <div class="form-group">
+                        <label for="id_first_name" class="form-label">First Name</label>
+                        <input type="text" name="first_name" id="id_first_name" class="form-input" placeholder="Enter your first name" required>
+                        {% if form.first_name.errors %}
+                            <div class="form-error">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- ✅ NEW: Last Name -->
+                    <div class="form-group">
+                        <label for="id_last_name" class="form-label">Last Name</label>
+                        <input type="text" name="last_name" id="id_last_name" class="form-input" placeholder="Enter your last name" required>
+                        {% if form.last_name.errors %}
+                            <div class="form-error">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
                     <div class="form-group">
                         <label for="id_username" class="form-label">Username</label>
-                        <input type="text" name="username" id="id_username" class="form-input" placeholder="Choose a username" required value="{{ form.username.value|default:'' }}">
+                        <input type="text" name="username" id="id_username" class="form-input" placeholder="Choose a username" required>
                         {% if form.username.errors %}
                             <div class="form-error">{{ form.username.errors.0 }}</div>
                         {% endif %}
@@ -22,20 +40,19 @@
                     
                     <div class="form-group">
                         <label for="id_email" class="form-label">Email</label>
-                        <input type="email" name="email" id="id_email" class="form-input" placeholder="Enter your email" required value="{{ form.email.value|default:'' }}">
+                        <input type="email" name="email" id="id_email" class="form-input" placeholder="Enter your email" required>
                         {% if form.email.errors %}
                             <div class="form-error">{{ form.email.errors.0 }}</div>
                         {% endif %}
                     </div>
                     
-                    <!-- Phone Number Field -->
                     <div class="form-group">
                         <label for="id_phone" class="form-label">Phone Number</label>
-                        <input type="tel" name="phone" id="id_phone" class="form-input" placeholder="Enter your phone number" value="{{ form.phone.value|default:'' }}">
+                        <input type="tel" name="phone" id="id_phone" class="form-input" placeholder="Enter your phone number">
                         {% if form.phone.errors %}
                             <div class="form-error">{{ form.phone.errors.0 }}</div>
                         {% endif %}
-                        <small class="form-help">Enter your phone number</small>
+                        <small class="form-help">Enter your phone number (optional)</small>
                     </div>
                     
                     <div class="form-group">

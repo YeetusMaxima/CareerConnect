@@ -134,13 +134,58 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- ✅ NEW: Similar Jobs Section -->
+                {% if similar_jobs %}
+                <div class="card mt-3" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid var(--accent-color);">
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="margin-bottom: 0.5rem;">
+                            <span style="margin-right: 0.5rem;">💡</span>
+                            Similar Jobs For You
+                        </h3>
+                        <p style="font-size: 0.8125rem; color: var(--dark-color); opacity: 0.8; margin: 0;">
+                            Based on your profile
+                        </p>
+                    </div>
+                    
+                    <div style="display: grid; gap: 1rem;">
+                        {% for similar_job in similar_jobs|slice:":4" %}
+                        <a href="{% url 'jobs:job_detail' similar_job.id %}" style="text-decoration: none;">
+                            <div class="card" style="background: white; border: 1px solid rgba(245, 158, 11, 0.3); transition: all 0.2s;">
+                                <div style="margin-bottom: 0.5rem;">
+                                    <h4 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--dark-color);">
+                                        {{ similar_job.title|truncatewords:4 }}
+                                    </h4>
+                                    <p style="font-size: 0.8125rem; color: var(--gray-color); margin: 0;">
+                                        {{ similar_job.company_name }}
+                                    </p>
+                                </div>
+                                
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.5rem;">
+                                    <span class="tag tag-primary" style="font-size: 0.7rem;">{{ similar_job.get_category_display }}</span>
+                                    <span class="tag tag-success" style="font-size: 0.7rem;">{{ similar_job.get_job_type_display }}</span>
+                                </div>
+                                
+                                <div style="font-size: 0.75rem; color: var(--gray-color);">
+                                    <div>📍 {{ similar_job.location }}</div>
+                                    <div>💰 {{ similar_job.salary_range }}</div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="{% url 'jobs:job_listings' %}" class="btn btn-small btn-outline" style="width: 100%; background: white;">
+                            View All Jobs →
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
-{% block extra_js %}
-<script src="/static/js/jobs.js"></script>
-{% endblock %}
 
 <script>
 function toggleSaveJob() {

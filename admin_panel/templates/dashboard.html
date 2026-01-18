@@ -80,7 +80,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Username</th>
+                    <th>Full Name</th>
                     <th>Type</th>
                     <th>Joined</th>
                 </tr>
@@ -90,7 +90,7 @@
                 <tr>
                     <td>
                         <a href="{% url 'admin_panel:user_detail' user.id %}" style="color: var(--accent-blue); text-decoration: none;">
-                            {{ user.username }}
+                            {{ user.get_full_name|default:user.username }}
                         </a>
                     </td>
                     <td>
@@ -167,7 +167,7 @@
         <tbody>
             {% for app in recent_applications %}
             <tr>
-                <td>{{ app.applicant.username }}</td>
+                <td>{{ app.applicant.get_full_name|default:app.applicant.username }}</td>
                 <td>{{ app.job.title|truncatewords:5 }}</td>
                 <td>
                     <span class="badge 
@@ -189,7 +189,7 @@
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+        </table>
 </div>
 
 <!-- Recent Contacts -->

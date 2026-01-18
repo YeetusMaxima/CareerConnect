@@ -10,7 +10,7 @@
             type="text" 
             name="search" 
             class="search-input" 
-            placeholder="Search by username, email, name..." 
+            placeholder="Search by name, username, email..." 
             value="{{ search_query }}"
         >
         
@@ -44,9 +44,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
                 <th>Full Name</th>
+                <th>Email</th>
                 <th>User Type</th>
                 <th>Status</th>
                 <th>Joined</th>
@@ -59,11 +58,15 @@
                 <td style="color: var(--text-secondary); font-family: monospace;">{{ user.id }}</td>
                 <td>
                     <a href="{% url 'admin_panel:user_detail' user.id %}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">
-                        {{ user.username }}
+                        {{ user.get_full_name|default:user.username }}
                     </a>
+                    {% if user.get_full_name %}
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            @{{ user.username }}
+                        </div>
+                    {% endif %}
                 </td>
                 <td style="color: var(--text-secondary);">{{ user.email }}</td>
-                <td>{{ user.get_full_name|default:"—" }}</td>
                 <td>
                     <span class="badge {% if user.profile.user_type == 'seeker' %}badge-blue{% else %}badge-green{% endif %}">
                         {{ user.profile.get_user_type_display }}
@@ -92,7 +95,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
                     <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
                     <div>No users found</div>
                 </td>

@@ -6,7 +6,7 @@
 <section class="py-4">
     <div class="container">
         <div class="dashboard-header">
-            <h1>Welcome back, {{ user.username }}!</h1>
+            <h1>Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
             <p style="color: var(--gray-color);">Manage your job applications and profile</p>
         </div>
         
@@ -27,6 +27,67 @@
                 <div class="stat-label">This Month</div>
             </div>
         </div>
+        
+        <!-- ✅ NEW: Recommended Jobs Section -->
+        {% if recommended_jobs %}
+        <div class="card mb-4" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid var(--primary-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="margin-bottom: 0.5rem;">
+                        <span style="margin-right: 0.5rem;">✨</span>
+                        Recommended Jobs For You
+                    </h2>
+                    <p style="color: var(--gray-color); margin: 0; font-size: 0.875rem;">
+                        Personalized recommendations based on your profile and activity
+                    </p>
+                </div>
+                <span class="tag" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none;">
+                    🤖 AI-Powered
+                </span>
+            </div>
+            
+            <div class="grid grid-3">
+                {% for job in recommended_jobs %}
+                    <div class="card" style="background: white; position: relative; overflow: visible;">
+                        <!-- AI Match Badge -->
+                        <div style="position: absolute; top: -8px; right: 10px; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            ✓ Smart Match
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <h3 class="card-title" style="margin-bottom: 0.25rem;">
+                                <a href="{% url 'jobs:job_detail' job.id %}" style="text-decoration: none; color: inherit;">
+                                    {{ job.title }}
+                                </a>
+                            </h3>
+                            <p class="card-subtitle">{{ job.company_name }}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 0.75rem;">
+                            <span class="tag tag-primary" style="margin-right: 0.5rem;">{{ job.get_category_display }}</span>
+                            <span class="tag tag-success">{{ job.get_job_type_display }}</span>
+                        </div>
+                        
+                        <div class="job-meta" style="margin-bottom: 1rem; font-size: 0.8125rem;">
+                            <div class="job-meta-item">📍 {{ job.location }}</div>
+                            <div class="job-meta-item">💰 {{ job.salary_range }}</div>
+                            <div class="job-meta-item">📅 {{ job.posted_date|timesince }} ago</div>
+                        </div>
+                        
+                        <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-primary btn-small" style="width: 100%;">
+                            View Details
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="{% url 'jobs:job_listings' %}" class="btn btn-outline">
+                    Explore More Jobs →
+                </a>
+            </div>
+        </div>
+        {% endif %}
         
         <!-- Quick Actions -->
         <div class="card mb-4">
@@ -119,7 +180,4 @@
         </div>
     </div>
 </section>
-{% block extra_js %}
-<script src="/static/js/jobs.js"></script>
-{% endblock %}
 {% endblock %}

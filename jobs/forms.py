@@ -6,6 +6,26 @@ from .models import UserProfile, Job, Application, Contact
 
 class UserRegistrationForm(UserCreationForm):
     """User registration form with user type selection"""
+    
+    # ✅ ADDED: Full Name Fields
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Enter your first name'
+        })
+    )
+    
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Enter your last name'
+        })
+    )
+    
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
@@ -14,10 +34,9 @@ class UserRegistrationForm(UserCreationForm):
         })
     )
     
-    # ✅ ADDED: Phone number field
     phone = forms.CharField(
         max_length=15,
-        required=False,  # Optional field
+        required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-input',
             'placeholder': 'Enter your phone number',
@@ -33,7 +52,7 @@ class UserRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'phone', 'password1', 'password2']  # ✅ Added 'phone'
+        fields = ['first_name', 'last_name', 'username', 'email', 'phone', 'password1', 'password2']  # ✅ Added names
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-input',

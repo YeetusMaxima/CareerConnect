@@ -16,6 +16,8 @@ from .forms import (
     JobSearchForm,
     ContactForm
 )
+# ✅ UPDATED: Import both recommendation functions
+from .ml_recommender import get_job_recommendations, get_candidate_recommendations
 
 
 # =========================
@@ -25,9 +27,20 @@ from .forms import (
 def home(request):
     recent_jobs = Job.objects.filter(is_active=True).order_by('-posted_date')[:6]
     job_categories = Job.CATEGORIES
+    
+    recommended_jobs = []
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        if request.user.profile.user_type == 'seeker':
+            try:
+                recommended_jobs = get_job_recommendations(request.user, count=6)
+            except Exception as e:
+                print(f"Recommendation error: {e}")
+                recommended_jobs = []
+    
     return render(request, 'home.html', {
         'recent_jobs': recent_jobs,
-        'job_categories': job_categories
+        'job_categories': job_categories,
+        'recommended_jobs': recommended_jobs,
     })
 
 
@@ -60,13 +73,12 @@ def register(request):
         if form.is_valid():
             user = form.save()
             user_type = form.cleaned_data.get('user_type')
-            phone = form.cleaned_data.get('phone')  # ✅ ADDED: Get phone from form
+            phone = form.cleaned_data.get('phone')
             
-            # ✅ UPDATED: Save phone to profile
             UserProfile.objects.create(
                 user=user, 
                 user_type=user_type,
-                phone=phone  # ✅ ADDED: Save phone
+                phone=phone
             )
             
             messages.success(request, 'Account created successfully! Please log in.')
@@ -78,7 +90,6 @@ def register(request):
 
 
 def user_login(request):
-    # ✅ If already logged in, redirect based on user type
     if request.user.is_authenticated:
         if request.user.is_superuser:
             return redirect('admin_panel:dashboard')
@@ -92,12 +103,10 @@ def user_login(request):
         if user:
             login(request, user)
             
-            # ✅ ADMIN REDIRECT: Check if user is superuser/admin
             if user.is_superuser:
                 messages.success(request, f'Welcome back, Admin {user.username}!')
                 return redirect('admin_panel:dashboard')
             
-            # Regular user redirect
             next_url = request.GET.get('next', 'jobs:home')
             messages.success(request, f'Welcome back, {user.username}!')
             return redirect(next_url)
@@ -150,11 +159,20 @@ def job_listings(request):
 
     paginator = Paginator(jobs, 12)
     page_obj = paginator.get_page(request.GET.get('page'))
+    
+    recommended_jobs = []
+    if request.user.profile.user_type == 'seeker':
+        try:
+            recommended_jobs = get_job_recommendations(request.user, count=6)
+        except Exception as e:
+            print(f"Recommendation error: {e}")
+            recommended_jobs = []
 
     return render(request, 'job_listings.html', {
         'form': form,
         'page_obj': page_obj,
-        'total_jobs': jobs.count()
+        'total_jobs': jobs.count(),
+        'recommended_jobs': recommended_jobs,
     })
 
 
@@ -168,11 +186,21 @@ def job_detail(request, job_id):
     if request.user.is_authenticated:
         is_saved = SavedJob.objects.filter(user=request.user, job=job).exists()
         has_applied = Application.objects.filter(applicant=request.user, job=job).exists()
+    
+    similar_jobs = []
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        if request.user.profile.user_type == 'seeker':
+            try:
+                similar_jobs = get_job_recommendations(request.user, count=4)
+            except Exception as e:
+                print(f"Recommendation error: {e}")
+                similar_jobs = []
 
     return render(request, 'job_detail.html', {
         'job': job,
         'is_saved': is_saved,
-        'has_applied': has_applied
+        'has_applied': has_applied,
+        'similar_jobs': similar_jobs,
     })
 
 
@@ -241,10 +269,18 @@ def save_job(request, job_id):
 def seeker_dashboard(request):
     if request.user.profile.user_type != 'seeker':
         return HttpResponseForbidden("Access denied")
+    
+    recommended_jobs = []
+    try:
+        recommended_jobs = get_job_recommendations(request.user, count=6)
+    except Exception as e:
+        print(f"Recommendation error: {e}")
+        recommended_jobs = []
 
     return render(request, 'seeker_dashboard.html', {
         'applications': Application.objects.filter(applicant=request.user),
-        'saved_jobs': SavedJob.objects.filter(user=request.user)
+        'saved_jobs': SavedJob.objects.filter(user=request.user),
+        'recommended_jobs': recommended_jobs,
     })
 
 
@@ -273,10 +309,23 @@ def seeker_profile(request):
 def employer_dashboard(request):
     if request.user.profile.user_type != 'employer':
         return HttpResponseForbidden("Access denied")
+    
+    # ✅ ADDED: Get recommended candidates for employer's jobs
+    employer_jobs = Job.objects.filter(employer=request.user, is_active=True)
+    recommended_candidates = []
+    
+    if employer_jobs.exists():
+        latest_job = employer_jobs.first()
+        try:
+            recommended_candidates = get_candidate_recommendations(latest_job, count=6)
+        except Exception as e:
+            print(f"Candidate recommendation error: {e}")
+            recommended_candidates = []
 
     return render(request, 'employer_dashboard.html', {
         'jobs': Job.objects.filter(employer=request.user),
-        'total_applications': Application.objects.filter(job__employer=request.user).count()
+        'total_applications': Application.objects.filter(job__employer=request.user).count(),
+        'recommended_candidates': recommended_candidates,  # ✅ ADDED
     })
 
 
@@ -348,9 +397,19 @@ def delete_job(request, job_id):
 def view_applications(request, job_id):
     job = get_object_or_404(Job, id=job_id, employer=request.user)
     applications = Application.objects.filter(job=job)
+    
+    # ✅ ADDED: Get recommended candidates for this specific job
+    recommended_candidates = []
+    try:
+        recommended_candidates = get_candidate_recommendations(job, count=8)
+    except Exception as e:
+        print(f"Candidate recommendation error: {e}")
+        recommended_candidates = []
+    
     return render(request, 'view_applications.html', {
         'job': job,
-        'applications': applications
+        'applications': applications,
+        'recommended_candidates': recommended_candidates,  # ✅ ADDED
     })
 
 
