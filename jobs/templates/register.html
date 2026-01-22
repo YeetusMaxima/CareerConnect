@@ -12,7 +12,6 @@
                 <form method="post">
                     {% csrf_token %}
                     
-                    <!-- ✅ NEW: First Name -->
                     <div class="form-group">
                         <label for="id_first_name" class="form-label">First Name</label>
                         <input type="text" name="first_name" id="id_first_name" class="form-input" placeholder="Enter your first name" required>
@@ -21,7 +20,6 @@
                         {% endif %}
                     </div>
                     
-                    <!-- ✅ NEW: Last Name -->
                     <div class="form-group">
                         <label for="id_last_name" class="form-label">Last Name</label>
                         <input type="text" name="last_name" id="id_last_name" class="form-input" placeholder="Enter your last name" required>

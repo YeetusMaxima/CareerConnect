@@ -291,10 +291,17 @@ def seeker_profile(request):
 
     if request.method == 'POST':
         form = JobSeekerProfileForm(request.POST, request.FILES, instance=request.user.profile)
+
+        # DEBUG: print incoming files
+        print("FILES coming from form:", request.FILES)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated')
             return redirect('jobs:seeker_dashboard')
+        else:
+            print("Form errors:", form.errors)
+
     else:
         form = JobSeekerProfileForm(instance=request.user.profile)
 

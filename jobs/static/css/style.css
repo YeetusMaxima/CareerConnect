@@ -1185,9 +1185,6 @@ input.error, textarea.error, select.error {
     background: rgba(16, 185, 129, 0.05);
 }
 
-input[type="file"] {
-    display: none;
-}
 
 .char-counter {
     text-align: right;
